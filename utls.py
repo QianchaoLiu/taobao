@@ -15,13 +15,14 @@ target_users = list(set(target_users))[:1001]
 # select 1000 users who chatted with sellers
 target_users.remove('')
 
+
 # SECTION 1
 ww_buyer_list = []  # 5147827 2065730
 ww_buyer_info_dict = {}
 with open('/Users/liuqianchao/Desktop/taobao/tmp_cl_yw_ww_all.csv') as f:
     for i, line in enumerate(f):
         if i > 0:
-            if i%100000 ==0:
+            if i % 100000 == 0:
                 print i
             seq_line = line.split(',')
             seller_user_id = seq_line[3]
@@ -69,16 +70,30 @@ with open('/Users/liuqianchao/Desktop/taobao/Tmp_cl_yw_append_trade0606.csv') as
                 else:
                     trade_buyer_dict[buyer_id].append([seller_id, gmt_receive_pay, quantity, total_fee])
 
-
-to_write = []
+pane = []
 for buyer in set(ww_buyer_list):
     if buyer in trade_buyer_dict.keys():
-        to_write.append([buyer] + ww_buyer_info_dict[buyer] + trade_buyer_dict[buyer])
+        for ww in ww_buyer_info_dict[buyer]:
+            seller = ww[0]
+            if seller in str(trade_buyer_dict[buyer]):
+                for trade in trade_buyer_dict[buyer]:
+                    if seller in str(trade):
+                        print [buyer], [seller], ww, '1'
+                        pane.append([buyer] + ww + ['1'] + trade)
+                        break
+            else:
+                print [buyer], [seller], ww, '0'
+                pane.append([buyer] + ww + ['0'])
+        # to_write.append([buyer] + [len(ww_buyer_info_dict[buyer])] + [len(trade_buyer_dict[buyer])] + ww_buyer_info_dict[buyer] + trade_buyer_dict[buyer])
     else:
-        to_write.append([buyer] + ww_buyer_info_dict[buyer])
-with open('./dat/trade_ww.csv','w') as wf:
-    for line in to_write:
+        for ww in ww_buyer_info_dict[buyer]:
+            seller = ww[0]
+            print [buyer], [seller], ww, '0'
+            pane.append([buyer] + ww + ['0'])
+        # to_write.append([buyer] + [len(ww_buyer_info_dict[buyer])] + [0] + ww_buyer_info_dict[buyer])
+
+
+with open('./dat/pane.csv','w') as wf:
+    for line in pane:
         line = [str(item) for item in line]
         wf.write(','.join(line)+'\n')
-
-
